@@ -28,6 +28,6 @@ public class Entrega {
 
     private LocalDate data;
 
-    private String status;
+    private StatusEntrega status;
 
 }

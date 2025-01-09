@@ -1,15 +1,22 @@
 package com.rr.gestor_api.service.trabalho;
 
 import com.rr.gestor_api.domain.cliente.Cliente;
+import com.rr.gestor_api.domain.entrega.Entrega;
 import com.rr.gestor_api.domain.trabalho.Trabalho;
 import com.rr.gestor_api.dto.cliente.ClienteCriarDTO;
+import com.rr.gestor_api.dto.entrega.EntregaAtualizarDTO;
+import com.rr.gestor_api.dto.trabalho.TrabalhoAtualizarDTO;
 import com.rr.gestor_api.dto.trabalho.TrabalhoCriarDTO;
+import com.rr.gestor_api.dto.trabalho.TrabalhoResumoRetornoDTO;
 import com.rr.gestor_api.repositories.ClienteRepository;
 import com.rr.gestor_api.repositories.TrabalhoRepository;
+import com.rr.gestor_api.service.erro.ErroException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class TrabalhoService {
@@ -38,45 +45,71 @@ public class TrabalhoService {
         trabalho.setCaminhoDrive(trabalhoInputDTO.caminhoDrive());
         trabalho.setObservacao(trabalhoInputDTO.observacao());
         trabalho.setValorTotal(trabalhoInputDTO.valorTotal());
+        List<Entrega>entregas = trabalhoInputDTO.entregas().stream().map(entregaCriarDTO -> {
+            Entrega entrega = new Entrega();
+            entrega.setTrabalho(trabalho);
+            entrega.setNome(entregaCriarDTO.nome());
+            entrega.setData(entregaCriarDTO.data());
+            entrega.setStatus(entregaCriarDTO.status());
+            return entrega;
+        }).toList();
+        trabalho.setEntregas(entregas);
 
         return trabalhoRepository.save(trabalho);
     }
 
     // Atualizar Trabalho
     @Transactional
-    public Trabalho atualizarTrabalho(Long id, TrabalhoCriarDTO trabalhoCriarDTO) {
+    public Trabalho atualizarTrabalho(Long id, TrabalhoAtualizarDTO trabalhoInputDTO) {
+        // Busca o trabalho pelo ID
         Trabalho trabalho = trabalhoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Trabalho não encontrado com o ID: " + id));
+                .orElseThrow(() -> new ErroException("id","Trabalho não encontrado com o ID: " + id));
 
-        Cliente cliente = clienteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado com o ID: " + id));
+        Cliente cliente = clienteRepository.findById(trabalhoInputDTO.clienteId())
+                .orElseThrow(() -> new ErroException("clienteId","Cliente não encontrado com o ID: " + trabalhoInputDTO.clienteId()));
 
-        // Atualizando os dados do trabalho
+        // Atualiza os campos do trabalho
         trabalho.setCliente(cliente);
-        trabalho.setTipoTrabalho(trabalhoCriarDTO.tipoTrabalho());
-        trabalho.setFaculdade(trabalhoCriarDTO.faculdade());
-        trabalho.setCurso(trabalhoCriarDTO.curso());
-        trabalho.setTema(trabalhoCriarDTO.tema());
-        trabalho.setCaminhoPendrive(trabalhoCriarDTO.caminhoPendrive());
-        trabalho.setCaminhoDrive(trabalhoCriarDTO.caminhoDrive());
-        trabalho.setObservacao(trabalhoCriarDTO.observacao());
-        trabalho.setValorTotal(trabalhoCriarDTO.valorTotal());
+        trabalho.setTipoTrabalho(trabalhoInputDTO.tipoTrabalho());
+        trabalho.setFaculdade(trabalhoInputDTO.faculdade());
+        trabalho.setCurso(trabalhoInputDTO.curso());
+        trabalho.setTema(trabalhoInputDTO.tema());
+        trabalho.setCaminhoPendrive(trabalhoInputDTO.caminhoPendrive());
+        trabalho.setCaminhoDrive(trabalhoInputDTO.caminhoDrive());
+        trabalho.setObservacao(trabalhoInputDTO.observacao());
+        trabalho.setValorTotal(trabalhoInputDTO.valorTotal());
+
+        // Atualiza as entregas
+        Map<Long, EntregaAtualizarDTO> entregasAtualizacaoMap = trabalhoInputDTO.entregas().stream()
+                .collect(Collectors.toMap(EntregaAtualizarDTO::id, entrega -> entrega));
+
+        trabalho.getEntregas().forEach(entrega -> {
+            EntregaAtualizarDTO entregaAtualizarDTO = entregasAtualizacaoMap.get(entrega.getId());
+            if (entregaAtualizarDTO != null) {
+                entrega.setNome(entregaAtualizarDTO.nome());
+                entrega.setData(entregaAtualizarDTO.data());
+                entrega.setStatus(entregaAtualizarDTO.status());
+            }
+        });
 
         return trabalhoRepository.save(trabalho);
     }
 
-    // Buscar Cliente por ID
+
+    // Buscar trabalho por ID
     @Transactional
     public Trabalho buscarTrabalhoPorId(Long id) {
         return trabalhoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Trabalho não encontrado com o ID: " + id));
     }
 
-    // Listar Todos os Clientes
+    // Listar Todos os trabalhos
     @Transactional
-    public List<Trabalho> listarTodosTrabalhos() {
-        return trabalhoRepository.findAll();
+    public List<TrabalhoResumoRetornoDTO> listarTodosTrabalhos() {
+
+        return trabalhoRepository.findTrabalhosWithMinEntregaDate();
     }
+
 
     // Deletar Cliente
     @Transactional

@@ -42,7 +42,7 @@ public class Trabalho {
 
     private String observacao;
 
-    private String statusEntregas;
+    private StatusEntrega statusEntregas;
 
     private String statusParcelas;
 

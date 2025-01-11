@@ -31,7 +31,8 @@ public class ClienteController {
     public ResponseEntity criar(@RequestBody ClienteCriarDTO body) {
 
         try{
-            return ResponseEntity.ok(service.criarCliente(body));
+            Cliente cliente = service.criarCliente(body);
+            return ResponseEntity.ok(new ClienteRetornoDTO(cliente));
         }catch (ErroException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErroDTO(e.getCampo(),e.getMessage()));
         }
@@ -47,5 +48,16 @@ public class ClienteController {
     public ResponseEntity<List<ClienteResumoRetornoDTO>> buscarTrabalhoPorId() {
         List<ClienteResumoRetornoDTO> clientes = service.listarTodosClientes();
         return ResponseEntity.ok(clientes);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletarCliente(@PathVariable("id") Long id) {
+        try {
+            service.deletarEntrega(id);
+            return ResponseEntity.ok("Cliente deletado com sucesso!");
+        } catch (ErroException e) {
+            // Caso o Cliente não seja encontrado, retorna erro
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErroDTO(e.getCampo(), e.getMessage()));
+        }
     }
 }

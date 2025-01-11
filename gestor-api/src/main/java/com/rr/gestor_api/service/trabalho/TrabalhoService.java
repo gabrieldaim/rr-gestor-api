@@ -2,15 +2,20 @@ package com.rr.gestor_api.service.trabalho;
 
 import com.rr.gestor_api.domain.cliente.Cliente;
 import com.rr.gestor_api.domain.entrega.Entrega;
+import com.rr.gestor_api.domain.parcela.Parcela;
 import com.rr.gestor_api.domain.trabalho.Trabalho;
-import com.rr.gestor_api.dto.cliente.ClienteCriarDTO;
+import com.rr.gestor_api.domain.usuario.Usuario;
 import com.rr.gestor_api.dto.entrega.EntregaAtualizarDTO;
+import com.rr.gestor_api.dto.parcela.ParcelaAtualizarDTO;
 import com.rr.gestor_api.dto.trabalho.TrabalhoAtualizarDTO;
 import com.rr.gestor_api.dto.trabalho.TrabalhoCriarDTO;
+import com.rr.gestor_api.dto.trabalho.TrabalhoResumoParcelasRetornoDTO;
 import com.rr.gestor_api.dto.trabalho.TrabalhoResumoRetornoDTO;
 import com.rr.gestor_api.repositories.ClienteRepository;
 import com.rr.gestor_api.repositories.TrabalhoRepository;
+import com.rr.gestor_api.repositories.UsuarioRepository;
 import com.rr.gestor_api.service.erro.ErroException;
+import com.rr.gestor_api.service.usuario.UsuarioService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +28,14 @@ public class TrabalhoService {
 
     private final TrabalhoRepository trabalhoRepository;
     private final ClienteRepository clienteRepository;
+    private final UsuarioService usuarioService;
+    private final UsuarioRepository usuarioRepository;
 
-    public TrabalhoService(TrabalhoRepository trabalhoRepository, ClienteRepository clienteRepository) {
+    public TrabalhoService(TrabalhoRepository trabalhoRepository, ClienteRepository clienteRepository, UsuarioService usuarioService, UsuarioRepository usuarioRepository) {
         this.trabalhoRepository = trabalhoRepository;
         this.clienteRepository = clienteRepository;
+        this.usuarioService = usuarioService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     public Trabalho criarTrabalho(TrabalhoCriarDTO trabalhoInputDTO) {
@@ -36,6 +45,7 @@ public class TrabalhoService {
 
         // Cria o trabalho associado ao cliente
         Trabalho trabalho = new Trabalho();
+        trabalho.setResponsavel(usuarioService.capturaUsuarioToken());
         trabalho.setCliente(cliente);
         trabalho.setTipoTrabalho(trabalhoInputDTO.tipoTrabalho());
         trabalho.setFaculdade(trabalhoInputDTO.faculdade());
@@ -45,6 +55,7 @@ public class TrabalhoService {
         trabalho.setCaminhoDrive(trabalhoInputDTO.caminhoDrive());
         trabalho.setObservacao(trabalhoInputDTO.observacao());
         trabalho.setValorTotal(trabalhoInputDTO.valorTotal());
+        //criando entregas
         List<Entrega>entregas = trabalhoInputDTO.entregas().stream().map(entregaCriarDTO -> {
             Entrega entrega = new Entrega();
             entrega.setTrabalho(trabalho);
@@ -54,6 +65,18 @@ public class TrabalhoService {
             return entrega;
         }).toList();
         trabalho.setEntregas(entregas);
+
+        //criando parcelas
+        List<Parcela>parcelas = trabalhoInputDTO.parcelas().stream().map(parcelaCriarDTO -> {
+            Parcela parcela = new Parcela();
+            parcela.setTrabalho(trabalho);
+            parcela.setNome(parcelaCriarDTO.nome());
+            parcela.setData(parcelaCriarDTO.data());
+            parcela.setStatus(parcelaCriarDTO.status());
+            parcela.setValor(parcelaCriarDTO.valor());
+            return parcela;
+        }).toList();
+        trabalho.setParcelas(parcelas);
 
         return trabalhoRepository.save(trabalho);
     }
@@ -68,8 +91,14 @@ public class TrabalhoService {
         Cliente cliente = clienteRepository.findById(trabalhoInputDTO.clienteId())
                 .orElseThrow(() -> new ErroException("clienteId","Cliente não encontrado com o ID: " + trabalhoInputDTO.clienteId()));
 
+        Usuario responsavel = usuarioRepository.findByEmail(trabalhoInputDTO.responsavelEmail())
+                .orElseThrow(() -> new ErroException("responsavelId","Responsavel não encontrado com o Email: " + trabalhoInputDTO.responsavelEmail()));
+
+        usuarioService.usuarioIsResponsavel(trabalho.getResponsavel().getId());
+
         // Atualiza os campos do trabalho
         trabalho.setCliente(cliente);
+        trabalho.setResponsavel(responsavel);
         trabalho.setTipoTrabalho(trabalhoInputDTO.tipoTrabalho());
         trabalho.setFaculdade(trabalhoInputDTO.faculdade());
         trabalho.setCurso(trabalhoInputDTO.curso());
@@ -92,6 +121,20 @@ public class TrabalhoService {
             }
         });
 
+        // Atualiza as parcelas
+        Map<Long, ParcelaAtualizarDTO> parcelasAtualizacaoMap = trabalhoInputDTO.parcelas().stream()
+                .collect(Collectors.toMap(ParcelaAtualizarDTO::id, parcela -> parcela));
+
+        trabalho.getParcelas().forEach(parcela -> {
+            ParcelaAtualizarDTO parcelaAtualizarDTO = parcelasAtualizacaoMap.get(parcela.getId());
+            if (parcelaAtualizarDTO != null) {
+                parcela.setNome(parcelaAtualizarDTO.nome());
+                parcela.setData(parcelaAtualizarDTO.data());
+                parcela.setStatus(parcelaAtualizarDTO.status());
+                parcela.setValor(parcelaAtualizarDTO.valor());
+            }
+        });
+
         return trabalhoRepository.save(trabalho);
     }
 
@@ -100,7 +143,7 @@ public class TrabalhoService {
     @Transactional
     public Trabalho buscarTrabalhoPorId(Long id) {
         return trabalhoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Trabalho não encontrado com o ID: " + id));
+                .orElseThrow(() -> new ErroException("id","Trabalho não encontrado com o ID: " + id));
     }
 
     // Listar Todos os trabalhos
@@ -110,13 +153,26 @@ public class TrabalhoService {
         return trabalhoRepository.findTrabalhosWithMinEntregaDate();
     }
 
-
-    // Deletar Cliente
     @Transactional
-    public void deletarCliente(Long id) {
-        if (!clienteRepository.existsById(id)) {
-            throw new RuntimeException("Cliente não encontrado com o ID: " + id);
-        }
-        clienteRepository.deleteById(id);
+    public List<TrabalhoResumoRetornoDTO> listarTodosTrabalhosEmail(String email) {
+
+        return trabalhoRepository.findTrabalhosWithMinEntregaDateByClienteEmail(email);
+    }
+
+    @Transactional
+    public List<TrabalhoResumoParcelasRetornoDTO> listarTodosTrabalhosParcela() {
+
+        return trabalhoRepository.findTrabalhosWithMinParcelaDate();
+    }
+
+
+    // Deletar Trabalho
+    @Transactional
+    public void deletarTrabalho(Long id) {
+        Trabalho trabalho = trabalhoRepository.findById(id)
+                .orElseThrow(() -> new ErroException("id","Trabalho não encontrado com o ID: " + id));
+        usuarioService.usuarioIsResponsavel(trabalho.getResponsavel().getId());
+
+        trabalhoRepository.deleteById(id);
     }
 }

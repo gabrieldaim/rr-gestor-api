@@ -34,6 +34,10 @@ public class Cliente {
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Trabalho> trabalhos = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "indicado_por", referencedColumnName = "id", foreignKey = @ForeignKey(name = "fk_indicado_por"))
+    private Cliente indicadoPor;
+
 
 }
 

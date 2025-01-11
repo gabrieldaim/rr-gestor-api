@@ -31,7 +31,7 @@ public class Parcela {
 
     private LocalDate data;
 
-    private String status;
+    private StatusParcela status;
 
 }
 

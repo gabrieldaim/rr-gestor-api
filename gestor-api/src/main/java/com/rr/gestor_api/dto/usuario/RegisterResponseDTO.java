@@ -1,4 +1,6 @@
 package com.rr.gestor_api.dto.usuario;
 
-public record RegisterResponseDTO(String name, String token){
+import java.util.UUID;
+
+public record RegisterResponseDTO(UUID id, String name, String token){
 }

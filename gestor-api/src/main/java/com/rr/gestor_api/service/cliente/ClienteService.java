@@ -7,6 +7,7 @@ import com.rr.gestor_api.dto.trabalho.TrabalhoResumoRetornoDTO;
 import com.rr.gestor_api.repositories.ClienteRepository;
 import com.rr.gestor_api.repositories.TrabalhoRepository;
 import com.rr.gestor_api.service.erro.ErroException;
+import com.rr.gestor_api.service.usuario.UsuarioService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -18,16 +19,19 @@ public class ClienteService {
 
     private final ClienteRepository clienteRepository;
     private final TrabalhoRepository trabalhoRepository;
+    private final UsuarioService usuarioService;
 
-    public ClienteService(ClienteRepository clienteRepository, TrabalhoRepository trabalhoRepository) {
+    public ClienteService(ClienteRepository clienteRepository, TrabalhoRepository trabalhoRepository, UsuarioService usuarioService) {
         this.clienteRepository = clienteRepository;
         this.trabalhoRepository = trabalhoRepository;
+        this.usuarioService = usuarioService;
     }
 
     // Criar Cliente
     @Transactional
     public Cliente criarCliente(ClienteCriarDTO clienteInputDTO) {
         Optional<Cliente> clienteExistente = clienteRepository.findByEmail(clienteInputDTO.email());
+        Optional<Cliente> clienteIndicacao = clienteRepository.findById(clienteInputDTO.indicadoPor());
         if(clienteExistente.isEmpty()){
             Cliente cliente = new Cliente();
             cliente.setNome(clienteInputDTO.nome());
@@ -35,6 +39,7 @@ public class ClienteService {
             cliente.setTelefone(clienteInputDTO.telefone());
             cliente.setTipoCliente(clienteInputDTO.tipoCliente());
             cliente.setObservacao(clienteInputDTO.observacao());
+            clienteIndicacao.ifPresent(cliente::setIndicadoPor);
 
             return clienteRepository.save(cliente);
         }else{
@@ -73,10 +78,11 @@ public class ClienteService {
 
     // Deletar Cliente
     @Transactional
-    public void deletarCliente(Long id) {
-        if (!clienteRepository.existsById(id)) {
-            throw new RuntimeException("Cliente não encontrado com o ID: " + id);
-        }
+    public void deletarEntrega(Long id) {
+        Cliente entrega = clienteRepository.findById(id)
+                .orElseThrow(() -> new ErroException("id","Cliente não encontrado com o ID: " + id));
+        usuarioService.userIsAuthorized();
+
         clienteRepository.deleteById(id);
     }
 }

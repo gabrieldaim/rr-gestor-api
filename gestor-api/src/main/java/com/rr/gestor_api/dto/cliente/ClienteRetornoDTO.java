@@ -8,10 +8,22 @@ public record ClienteRetornoDTO(
         String email,
         String telefone,
         String tipoCliente,
-        String observacao
+        String observacao,
+        String indicadoPorEmail,
+        String indicadoPorNome
 ) {
     // Construtor que converte diretamente de um Cliente para ClienteOutputDTO
     public ClienteRetornoDTO(Cliente cliente) {
-        this(cliente.getId(), cliente.getNome(), cliente.getEmail(), cliente.getTelefone(), cliente.getTipoCliente(), cliente.getObservacao());
+        this(
+                cliente.getId(),
+                cliente.getNome(),
+                cliente.getEmail(),
+                cliente.getTelefone(),
+                cliente.getTipoCliente(),
+                cliente.getObservacao(),
+                cliente.getIndicadoPor() != null ? cliente.getIndicadoPor().getEmail() : null,
+                cliente.getIndicadoPor() != null ? cliente.getIndicadoPor().getNome() : null
+        );
     }
+
 }

@@ -8,6 +8,7 @@ CREATE TABLE cliente (
 );
 CREATE TABLE trabalho (
     id SERIAL PRIMARY KEY,
+    responsavel_id UUID,
     cliente_id BIGINT NOT NULL,
     tipo_trabalho VARCHAR(100),
     faculdade VARCHAR(255),
@@ -21,7 +22,8 @@ CREATE TABLE trabalho (
     tipo_pagamento VARCHAR(50),
     valor_total DECIMAL(10, 2),
     valor_pago DECIMAL(10, 2),
-    FOREIGN KEY (cliente_id) REFERENCES cliente(id) ON DELETE CASCADE
+    FOREIGN KEY (cliente_id) REFERENCES cliente(id) ON DELETE CASCADE,
+    FOREIGN KEY (responsavel_id) REFERENCES usuarios(id)
 );
 CREATE TABLE entrega (
     id SERIAL PRIMARY KEY,

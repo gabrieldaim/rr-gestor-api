@@ -2,7 +2,10 @@ package com.rr.gestor_api.domain.trabalho;
 
 import com.rr.gestor_api.domain.cliente.Cliente;
 import com.rr.gestor_api.domain.entrega.Entrega;
+import com.rr.gestor_api.domain.entrega.StatusEntrega;
 import com.rr.gestor_api.domain.parcela.Parcela;
+import com.rr.gestor_api.domain.parcela.StatusParcela;
+import com.rr.gestor_api.domain.usuario.Usuario;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -44,9 +47,9 @@ public class Trabalho {
 
     private StatusEntrega statusEntregas;
 
-    private String statusParcelas;
+    private StatusParcela statusParcelas;
 
-    private String tipoPagamento;
+    private TipoPagamento tipoPagamento;
 
     private BigDecimal valorTotal;
 
@@ -58,5 +61,8 @@ public class Trabalho {
     @OneToMany(mappedBy = "trabalho", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Parcela> parcelas = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "responsavel_id", referencedColumnName = "id")
+    private Usuario responsavel;
 }
 

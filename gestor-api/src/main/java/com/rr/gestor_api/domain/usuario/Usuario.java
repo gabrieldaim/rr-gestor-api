@@ -10,10 +10,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "usuarios")
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -23,4 +23,5 @@ public class Usuario {
     private String senha;
     @Enumerated(EnumType.STRING)
     private TiposUsuarios tipo;
+
 }

@@ -5,10 +5,7 @@ import com.rr.gestor_api.domain.trabalho.Trabalho;
 import com.rr.gestor_api.dto.cliente.ClienteCriarDTO;
 import com.rr.gestor_api.dto.cliente.ClienteRetornoDTO;
 import com.rr.gestor_api.dto.erro.ErroDTO;
-import com.rr.gestor_api.dto.trabalho.TrabalhoAtualizarDTO;
-import com.rr.gestor_api.dto.trabalho.TrabalhoCriarDTO;
-import com.rr.gestor_api.dto.trabalho.TrabalhoResumoRetornoDTO;
-import com.rr.gestor_api.dto.trabalho.TrabalhoRetornoDTO;
+import com.rr.gestor_api.dto.trabalho.*;
 import com.rr.gestor_api.repositories.ClienteRepository;
 import com.rr.gestor_api.repositories.TrabalhoRepository;
 import com.rr.gestor_api.service.cliente.ClienteService;
@@ -45,8 +42,20 @@ public class TrabalhoController {
     }
 
     @GetMapping("/todosResumo")
-    public ResponseEntity<List<TrabalhoResumoRetornoDTO>> buscarTrabalhoPorId() {
+    public ResponseEntity<List<TrabalhoResumoRetornoDTO>> buscarTrabalhos() {
         List<TrabalhoResumoRetornoDTO> trabalhos = service.listarTodosTrabalhos();
+        return ResponseEntity.ok(trabalhos);
+    }
+
+    @GetMapping("/todosResumoEmail/{email}")
+    public ResponseEntity<List<TrabalhoResumoRetornoDTO>> buscarTrabalhosEmail(@PathVariable String email) {
+        List<TrabalhoResumoRetornoDTO> trabalhos = service.listarTodosTrabalhosEmail(email);
+        return ResponseEntity.ok(trabalhos);
+    }
+
+    @GetMapping("/todosResumoParcelas")
+    public ResponseEntity<List<TrabalhoResumoParcelasRetornoDTO>> buscarTrabalhoParcela() {
+        List<TrabalhoResumoParcelasRetornoDTO> trabalhos = service.listarTodosTrabalhosParcela();
         return ResponseEntity.ok(trabalhos);
     }
 
@@ -67,5 +76,17 @@ public class TrabalhoController {
             // Caso o trabalho não seja encontrado, retorna erro
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErroDTO(e.getCampo(),e.getMessage()));
         }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletarTrabalho(@PathVariable("id") Long id){
+        try {
+            service.deletarTrabalho(id);
+            return ResponseEntity.ok("Trabalho deletado com sucesso!");
+        }catch (ErroException e) {
+            // Caso o trabalho não seja encontrado, retorna erro
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErroDTO(e.getCampo(),e.getMessage()));
+        }
+
     }
 }

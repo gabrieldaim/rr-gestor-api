@@ -4,5 +4,6 @@ public record ClienteCriarDTO(    String nome,
                                   String email,
                                   String telefone,
                                   String tipoCliente,
-                                  String observacao) {
+                                  String observacao,
+                                  Long indicadoPor) {
 }

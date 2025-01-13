@@ -45,8 +45,10 @@ public class Trabalho {
 
     private String observacao;
 
+    @Enumerated(EnumType.STRING)
     private StatusEntrega statusEntregas;
 
+    @Enumerated(EnumType.STRING)
     private StatusParcela statusParcelas;
 
     private TipoPagamento tipoPagamento;

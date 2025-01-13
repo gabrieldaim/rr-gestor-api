@@ -28,6 +28,7 @@ public class Entrega {
 
     private LocalDate data;
 
+    @Enumerated(EnumType.STRING)
     private StatusEntrega status;
 
 }

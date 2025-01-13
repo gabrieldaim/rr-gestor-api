@@ -31,6 +31,7 @@ public class Parcela {
 
     private LocalDate data;
 
+    @Enumerated(EnumType.STRING)
     private StatusParcela status;
 
 }

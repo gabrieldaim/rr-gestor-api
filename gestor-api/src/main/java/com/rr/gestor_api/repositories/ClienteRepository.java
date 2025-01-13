@@ -1,7 +1,6 @@
 package com.rr.gestor_api.repositories;
 
 import com.rr.gestor_api.domain.cliente.Cliente;
-import com.rr.gestor_api.domain.usuario.Usuario;
 import com.rr.gestor_api.dto.cliente.ClienteResumoRetornoDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

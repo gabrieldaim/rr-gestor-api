@@ -1,5 +1,7 @@
 package com.rr.gestor_api.repositories;
 
+import com.rr.gestor_api.domain.entrega.StatusEntrega;
+import com.rr.gestor_api.domain.parcela.StatusParcela;
 import com.rr.gestor_api.domain.trabalho.Trabalho;
 import com.rr.gestor_api.dto.trabalho.TrabalhoResumoParcelasRetornoDTO;
 import com.rr.gestor_api.dto.trabalho.TrabalhoResumoRetornoDTO;
@@ -54,6 +56,13 @@ public interface TrabalhoRepository extends JpaRepository<Trabalho, Long> {
             "GROUP BY t.id, t.cliente.nome, t.tema, t.tipoTrabalho, e.status " +
             "ORDER BY MIN(e.data) ASC")
     List<TrabalhoResumoRetornoDTO> findTrabalhosWithMinEntregaDateByClienteEmail(@Param("email") String email);
+
+    @Query("SELECT t FROM Trabalho t JOIN t.parcelas p WHERE p.status = :status")
+    List<Trabalho> findTrabalhosWithParcelasStatus(@Param("status") StatusParcela status);
+
+    @Query("SELECT t FROM Trabalho t JOIN t.entregas e WHERE e.status IN :statuses")
+    List<Trabalho> findTrabalhosWithEntregasStatus(@Param("statuses") List<StatusEntrega> statuses);
+
 
 
 

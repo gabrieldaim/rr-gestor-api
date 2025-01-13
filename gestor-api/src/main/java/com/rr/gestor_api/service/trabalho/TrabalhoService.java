@@ -2,7 +2,9 @@ package com.rr.gestor_api.service.trabalho;
 
 import com.rr.gestor_api.domain.cliente.Cliente;
 import com.rr.gestor_api.domain.entrega.Entrega;
+import com.rr.gestor_api.domain.entrega.StatusEntrega;
 import com.rr.gestor_api.domain.parcela.Parcela;
+import com.rr.gestor_api.domain.parcela.StatusParcela;
 import com.rr.gestor_api.domain.trabalho.Trabalho;
 import com.rr.gestor_api.domain.usuario.Usuario;
 import com.rr.gestor_api.dto.entrega.EntregaAtualizarDTO;
@@ -19,6 +21,8 @@ import com.rr.gestor_api.service.usuario.UsuarioService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -175,4 +179,62 @@ public class TrabalhoService {
 
         trabalhoRepository.deleteById(id);
     }
+
+    @Transactional
+    public void atualizarStatusTrabalhos() {
+        // Busca todos os trabalhos com parcelas aguardando data
+        List<Trabalho> trabalhosParcelas = trabalhoRepository.findTrabalhosWithParcelasStatus(StatusParcela.AGUARDANDO_DATA);
+
+        // Data atual
+        LocalDate dataAtual = LocalDate.now();
+
+        // Varre os trabalhos
+        for (Trabalho trabalho : trabalhosParcelas) {
+            boolean possuiParcelaAtrasada = false;
+
+
+            // Atualiza o status das parcelas
+            for (Parcela parcela : trabalho.getParcelas()) {
+                if (parcela.getStatus() == StatusParcela.AGUARDANDO_DATA && parcela.getData().isBefore(dataAtual)) {
+                    parcela.setStatus(StatusParcela.ATRASADA);
+                    System.out.println("Trabalho:" + parcela.getTrabalho().getId() + "atualizado com sucesso!");
+                    possuiParcelaAtrasada = true; // Marca que o trabalho tem ao menos uma parcela atrasada
+                }
+            }
+
+            // Atualiza o status do trabalho, se necessário
+            if (possuiParcelaAtrasada) {
+                trabalho.setStatusParcelas(StatusParcela.ATRASADA);
+            }
+        }
+
+        List<StatusEntrega> statuses = Arrays.asList(
+                StatusEntrega.NAO_INICIADA,
+                StatusEntrega.EM_ANDAMENTO,
+                StatusEntrega.EM_REVISAO
+        );
+
+        List<Trabalho> trabalhosEntrega = trabalhoRepository.findTrabalhosWithEntregasStatus(statuses);
+
+        for (Trabalho trabalho : trabalhosEntrega) {
+            boolean possuiEntregaAtrasada = false;
+
+
+            // Atualiza o status das Entregas
+            for (Entrega entrega : trabalho.getEntregas()) {
+                if ((entrega.getStatus() == StatusEntrega.EM_REVISAO || entrega.getStatus() == StatusEntrega.EM_ANDAMENTO || entrega.getStatus() == StatusEntrega.NAO_INICIADA) && entrega.getData().isBefore(dataAtual)) {
+                    entrega.setStatus(StatusEntrega.ATRASADA);
+                    System.out.println("Trabalho:" + entrega.getTrabalho().getId() + "atualizado com sucesso!");
+                    possuiEntregaAtrasada = true; // Marca que o trabalho tem ao menos uma entrega atrasada
+                }
+            }
+
+            // Atualiza o status do trabalho, se necessário
+            if (possuiEntregaAtrasada) {
+                trabalho.setStatusEntregas(StatusEntrega.ATRASADA);
+            }
+        }
+        System.out.println("####################trabalhos atualizados####################");
+    }
+
 }

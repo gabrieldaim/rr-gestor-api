@@ -32,7 +32,7 @@ public class AuthController {
                     .orElseThrow(() -> new RuntimeException("Usuario não encontrado"));
             if (passwordEncoder.matches(body.senha(), user.getSenha())) {
                 String token = this.tokenService.generateToken(user);
-                return ResponseEntity.ok(new LoginResponseDTO(user.getId(),user.getNome(), token));
+                return ResponseEntity.ok(new LoginResponseDTO(user.getId(),user.getNome(), token,user.getTipo()));
             }
             return ResponseEntity.badRequest().body("Usuário ou senha incorreto");
         } catch (RuntimeException e) {
@@ -53,7 +53,7 @@ public class AuthController {
                 newUser.setTipo(body.tipo());
                 repository.save(newUser);
                 String token = this.tokenService.generateToken(newUser);
-                return ResponseEntity.ok(new LoginResponseDTO(newUser.getId(),newUser.getNome(), token));
+                return ResponseEntity.ok(new LoginResponseDTO(newUser.getId(),newUser.getNome(), token,newUser.getTipo()));
 
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuário já cadastrado no sistema");

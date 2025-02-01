@@ -3,6 +3,7 @@ package com.rr.gestor_api.service.parcela;
 import com.rr.gestor_api.domain.entrega.Entrega;
 import com.rr.gestor_api.domain.parcela.Parcela;
 import com.rr.gestor_api.domain.trabalho.Trabalho;
+import com.rr.gestor_api.dto.entrega.EntregaCriarDTO;
 import com.rr.gestor_api.dto.parcela.ParcelaCriarDTO;
 import com.rr.gestor_api.repositories.ParcelaRepository;
 import com.rr.gestor_api.repositories.TrabalhoRepository;
@@ -39,6 +40,7 @@ public class ParcelaService {
 
         return parcelaRepository.save(parcela);
     }
+
 
     // Deletar Parcela
     @Transactional

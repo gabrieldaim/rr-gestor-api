@@ -146,8 +146,13 @@ public class TrabalhoService {
     // Buscar trabalho por ID
     @Transactional
     public Trabalho buscarTrabalhoPorId(Long id) {
-        return trabalhoRepository.findById(id)
+
+        Trabalho trabalho = trabalhoRepository.findById(id)
                 .orElseThrow(() -> new ErroException("id","Trabalho não encontrado com o ID: " + id));
+
+                usuarioService.usuarioIsResponsavel(trabalho.getResponsavel().getId());
+
+        return trabalho;
     }
 
     // Listar Todos os trabalhos
@@ -165,7 +170,7 @@ public class TrabalhoService {
 
     @Transactional
     public List<TrabalhoResumoParcelasRetornoDTO> listarTodosTrabalhosParcela() {
-
+        usuarioService.userIsAuthorized();
         return trabalhoRepository.findTrabalhosWithMinParcelaDate();
     }
 

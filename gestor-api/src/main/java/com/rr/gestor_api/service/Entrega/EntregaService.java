@@ -39,6 +39,7 @@ public class EntregaService {
         entrega.setData(entregaCriarDTO.data());
         entrega.setStatus(entregaCriarDTO.status());
 
+        usuarioService.usuarioIsResponsavel(entrega.getTrabalho().getResponsavel().getId());
         return entregaRepository.save(entrega);
     }
 

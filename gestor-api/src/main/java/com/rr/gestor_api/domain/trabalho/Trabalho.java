@@ -31,7 +31,7 @@ public class Trabalho {
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;
 
-    private String tipoTrabalho;
+    private TipoTrabalho tipoTrabalho;
 
     private String faculdade;
 

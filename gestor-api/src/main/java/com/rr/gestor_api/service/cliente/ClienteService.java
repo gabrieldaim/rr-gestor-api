@@ -51,6 +51,7 @@ public class ClienteService {
     // Atualizar Cliente
     @Transactional
     public Cliente atualizarCliente(Long id, ClienteCriarDTO clienteInputDTO) {
+        usuarioService.userIsAuthorized();
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado com o ID: " + id));
 
@@ -66,6 +67,7 @@ public class ClienteService {
     // Buscar Cliente por ID
     @Transactional
     public Cliente buscarClientePorId(Long id) {
+        usuarioService.userIsAuthorized();
         return clienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado com o ID: " + id));
     }
@@ -78,11 +80,11 @@ public class ClienteService {
 
     // Deletar Cliente
     @Transactional
-    public void deletarEntrega(Long id) {
-        Cliente entrega = clienteRepository.findById(id)
-                .orElseThrow(() -> new ErroException("id","Cliente não encontrado com o ID: " + id));
+    public void deletarCliente(Long id) {
         usuarioService.userIsAuthorized();
-
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> new ErroException("id","Cliente não encontrado com o ID: " + id));
+        
         clienteRepository.deleteById(id);
     }
 }

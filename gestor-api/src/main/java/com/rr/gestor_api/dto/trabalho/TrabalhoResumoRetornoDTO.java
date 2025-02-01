@@ -2,6 +2,8 @@ package com.rr.gestor_api.dto.trabalho;
 
 
 import com.rr.gestor_api.domain.entrega.StatusEntrega;
+import com.rr.gestor_api.domain.trabalho.TipoTrabalho;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,11 +20,11 @@ public class TrabalhoResumoRetornoDTO {
     private Long id;
     private String nome;
     private String tema;
-    private String tipoTrabalho;
+    private TipoTrabalho tipoTrabalho;
     private LocalDate proxPrazo;
     private StatusEntrega statusEntrega;
 
-    public TrabalhoResumoRetornoDTO(Long id, String nome, String tema, String tipoTrabalho, LocalDate proxPrazo, StatusEntrega statusEntrega) {
+    public TrabalhoResumoRetornoDTO(Long id, String nome, String tema, TipoTrabalho tipoTrabalho, LocalDate proxPrazo, StatusEntrega statusEntrega) {
         this.id = id;
         this.nome = nome;
         this.tema = tema;

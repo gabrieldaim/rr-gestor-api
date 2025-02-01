@@ -4,6 +4,7 @@ import com.rr.gestor_api.domain.entrega.Entrega;
 import com.rr.gestor_api.domain.entrega.StatusEntrega;
 import com.rr.gestor_api.domain.parcela.StatusParcela;
 import com.rr.gestor_api.domain.trabalho.TipoPagamento;
+import com.rr.gestor_api.domain.trabalho.TipoTrabalho;
 import com.rr.gestor_api.domain.trabalho.Trabalho;
 import com.rr.gestor_api.dto.entrega.EntregaRetornoPuraDTO;
 import com.rr.gestor_api.dto.parcela.ParcelaRetornoPuraDTO;
@@ -19,7 +20,7 @@ public record TrabalhoRetornoDTO(Long id,
                                  String nome,
                                  String email,
                                  String telefone,
-                                 String tipoTrabalho,
+                                 TipoTrabalho tipoTrabalho,
                                  String faculdade,
                                  String curso,
                                  String tema,

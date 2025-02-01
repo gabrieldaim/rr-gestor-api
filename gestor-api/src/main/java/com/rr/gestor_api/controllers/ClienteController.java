@@ -53,7 +53,7 @@ public class ClienteController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletarCliente(@PathVariable("id") Long id) {
         try {
-            service.deletarEntrega(id);
+            service.deletarCliente(id);
             return ResponseEntity.ok("Cliente deletado com sucesso!");
         } catch (ErroException e) {
             // Caso o Cliente não seja encontrado, retorna erro

@@ -1,5 +1,6 @@
 package com.rr.gestor_api.dto.trabalho;
 
+import com.rr.gestor_api.domain.trabalho.TipoTrabalho;
 import com.rr.gestor_api.dto.entrega.EntregaAtualizarDTO;
 import com.rr.gestor_api.dto.entrega.EntregaCriarDTO;
 import com.rr.gestor_api.dto.parcela.ParcelaAtualizarDTO;
@@ -10,7 +11,7 @@ import java.util.UUID;
 
 public record TrabalhoAtualizarDTO(Long clienteId,
                                    String responsavelEmail,
-                                   String tipoTrabalho,
+                                   TipoTrabalho tipoTrabalho,
                                    String faculdade,
                                    String curso,
                                    String tema,

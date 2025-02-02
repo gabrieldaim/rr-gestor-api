@@ -43,7 +43,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity login(@RequestBody RegisterRequestDTO body) {
         try{
-            usuarioService.userIsAuthorized();
+            // usuarioService.userIsAuthorized();
             Optional<Usuario> user = this.repository.findByEmail(body.email());
             if (user.isEmpty()) {
                 Usuario newUser = new Usuario();

@@ -10,7 +10,8 @@ public record ClienteRetornoDTO(
         String tipoCliente,
         String observacao,
         String indicadoPorEmail,
-        String indicadoPorNome
+        String indicadoPorNome,
+        Long indicadoPorId
 ) {
     // Construtor que converte diretamente de um Cliente para ClienteOutputDTO
     public ClienteRetornoDTO(Cliente cliente) {
@@ -22,7 +23,8 @@ public record ClienteRetornoDTO(
                 cliente.getTipoCliente(),
                 cliente.getObservacao(),
                 cliente.getIndicadoPor() != null ? cliente.getIndicadoPor().getEmail() : null,
-                cliente.getIndicadoPor() != null ? cliente.getIndicadoPor().getNome() : null
+                cliente.getIndicadoPor() != null ? cliente.getIndicadoPor().getNome() : null,
+                cliente.getIndicadoPor() != null ? cliente.getIndicadoPor().getId() : null
         );
     }
 

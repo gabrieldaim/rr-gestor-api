@@ -5,8 +5,6 @@ import com.rr.gestor_api.dto.cliente.ClienteCriarDTO;
 import com.rr.gestor_api.dto.cliente.ClienteResumoRetornoDTO;
 import com.rr.gestor_api.dto.cliente.ClienteRetornoDTO;
 import com.rr.gestor_api.dto.erro.ErroDTO;
-import com.rr.gestor_api.dto.trabalho.TrabalhoResumoProxEntregasRetornoDTO;
-import com.rr.gestor_api.dto.usuario.LoginResponseDTO;
 import com.rr.gestor_api.repositories.ClienteRepository;
 import com.rr.gestor_api.service.cliente.ClienteService;
 import com.rr.gestor_api.service.erro.ErroException;
@@ -16,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 
 
@@ -58,6 +55,25 @@ public class ClienteController {
         } catch (ErroException e) {
             // Caso o Cliente não seja encontrado, retorna erro
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErroDTO(e.getCampo(), e.getMessage()));
+        }
+    }
+
+@PutMapping("/{id}")
+    public ResponseEntity<?> atualizarCliente(
+            @PathVariable("id") Long id,
+            @RequestBody ClienteCriarDTO clienteAtualizar) {
+
+        try {
+            // Chama o serviço para atualizar o trabalho
+            Cliente clienteAtualizado = service.atualizarCliente(id, clienteAtualizar);
+
+            // Retorna o trabalho atualizado como DTO
+            ClienteRetornoDTO clienteRetornoDTO = new ClienteRetornoDTO(clienteAtualizado);
+
+            return ResponseEntity.ok(clienteRetornoDTO);
+        } catch (ErroException e) {
+            // Caso o trabalho não seja encontrado, retorna erro
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErroDTO(e.getCampo(),e.getMessage()));
         }
     }
 }

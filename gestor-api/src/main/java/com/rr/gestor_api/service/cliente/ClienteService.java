@@ -31,7 +31,11 @@ public class ClienteService {
     @Transactional
     public Cliente criarCliente(ClienteCriarDTO clienteInputDTO) {
         Optional<Cliente> clienteExistente = clienteRepository.findByEmail(clienteInputDTO.email());
-        Optional<Cliente> clienteIndicacao = clienteRepository.findById(clienteInputDTO.indicadoPor());
+        Optional<Cliente> clienteIndicacao = Optional.empty();
+        if(clienteInputDTO.indicadoPor() != null){
+            clienteIndicacao = clienteRepository.findById(clienteInputDTO.indicadoPor());
+        }
+
         if(clienteExistente.isEmpty()){
             Cliente cliente = new Cliente();
             cliente.setNome(clienteInputDTO.nome());
@@ -55,11 +59,17 @@ public class ClienteService {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado com o ID: " + id));
 
+                Optional<Cliente> clienteIndicacao = Optional.empty();
+        if(clienteInputDTO.indicadoPor() != null){
+            clienteIndicacao = clienteRepository.findById(clienteInputDTO.indicadoPor());
+        }
+
         cliente.setNome(clienteInputDTO.nome());
         cliente.setEmail(clienteInputDTO.email());
         cliente.setTelefone(clienteInputDTO.telefone());
         cliente.setTipoCliente(clienteInputDTO.tipoCliente());
         cliente.setObservacao(clienteInputDTO.observacao());
+        clienteIndicacao.ifPresent(cliente::setIndicadoPor);
 
         return clienteRepository.save(cliente);
     }

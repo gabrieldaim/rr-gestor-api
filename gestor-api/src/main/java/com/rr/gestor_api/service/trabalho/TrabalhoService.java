@@ -12,7 +12,7 @@ import com.rr.gestor_api.dto.parcela.ParcelaAtualizarDTO;
 import com.rr.gestor_api.dto.trabalho.TrabalhoAtualizarDTO;
 import com.rr.gestor_api.dto.trabalho.TrabalhoCriarDTO;
 import com.rr.gestor_api.dto.trabalho.TrabalhoResumoParcelasRetornoDTO;
-import com.rr.gestor_api.dto.trabalho.TrabalhoResumoRetornoDTO;
+import com.rr.gestor_api.dto.trabalho.TrabalhoResumoProxEntregasRetornoDTO;
 import com.rr.gestor_api.repositories.ClienteRepository;
 import com.rr.gestor_api.repositories.TrabalhoRepository;
 import com.rr.gestor_api.repositories.UsuarioRepository;
@@ -47,9 +47,12 @@ public class TrabalhoService {
         Cliente cliente = clienteRepository.findById(trabalhoInputDTO.clienteId())
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado com o ID: " + trabalhoInputDTO.clienteId()));
 
+        Usuario usuario = usuarioRepository.findByEmail(trabalhoInputDTO.responsavelEmail())
+                .orElseThrow(() -> new RuntimeException("Usuario não encontrado com o email: " + trabalhoInputDTO.responsavelEmail()));
+
         // Cria o trabalho associado ao cliente
         Trabalho trabalho = new Trabalho();
-        trabalho.setResponsavel(usuarioService.capturaUsuarioToken());
+        trabalho.setResponsavel(usuario);
         trabalho.setCliente(cliente);
         trabalho.setTipoTrabalho(trabalhoInputDTO.tipoTrabalho());
         trabalho.setFaculdade(trabalhoInputDTO.faculdade());
@@ -59,6 +62,21 @@ public class TrabalhoService {
         trabalho.setCaminhoDrive(trabalhoInputDTO.caminhoDrive());
         trabalho.setObservacao(trabalhoInputDTO.observacao());
         trabalho.setValorTotal(trabalhoInputDTO.valorTotal());
+        trabalho.setTipoPagamento(trabalhoInputDTO.tipoPagamento());
+
+        // Atualiza o status do trabalho com base nos status das entregas
+        if (trabalhoInputDTO.entregas().stream().anyMatch(entrega -> entrega.status() == StatusEntrega.ATRASADA)) {
+            trabalho.setStatusEntregas(StatusEntrega.ATRASADA);
+        } else if (trabalhoInputDTO.entregas().stream().anyMatch(entrega -> entrega.status() == StatusEntrega.EM_REVISAO)) {
+            trabalho.setStatusEntregas(StatusEntrega.EM_REVISAO);
+        } else if (trabalhoInputDTO.entregas().stream().anyMatch(entrega -> entrega.status() == StatusEntrega.EM_ANDAMENTO)) {
+            trabalho.setStatusEntregas(StatusEntrega.EM_ANDAMENTO);
+        } else if (trabalhoInputDTO.entregas().stream().anyMatch(entrega -> entrega.status() == StatusEntrega.NAO_INICIADA)) {
+            trabalho.setStatusEntregas(StatusEntrega.NAO_INICIADA);
+        } else {
+            trabalho.setStatusEntregas(StatusEntrega.CONCLUIDA);
+        }
+
         //criando entregas
         List<Entrega>entregas = trabalhoInputDTO.entregas().stream().map(entregaCriarDTO -> {
             Entrega entrega = new Entrega();
@@ -81,6 +99,13 @@ public class TrabalhoService {
             return parcela;
         }).toList();
         trabalho.setParcelas(parcelas);
+
+        // Atualiza o status do trabalho com base na entrega de menor data
+        trabalho.getParcelas().stream()
+        .sorted((e1, e2) -> e1.getData().compareTo(e2.getData()))
+        .filter(parcela -> parcela.getStatus() != StatusParcela.PAGA)
+        .findFirst()
+        .ifPresent(parcela -> trabalho.setStatusParcelas(parcela.getStatus()));
 
         return trabalhoRepository.save(trabalho);
     }
@@ -111,33 +136,89 @@ public class TrabalhoService {
         trabalho.setCaminhoDrive(trabalhoInputDTO.caminhoDrive());
         trabalho.setObservacao(trabalhoInputDTO.observacao());
         trabalho.setValorTotal(trabalhoInputDTO.valorTotal());
+        trabalho.setTipoPagamento(trabalhoInputDTO.tipoPagamento());
+
+        // Atualiza o status do trabalho com base nos status das entregas
+        if (trabalhoInputDTO.entregas().stream().anyMatch(entrega -> entrega.status() == StatusEntrega.ATRASADA)) {
+            trabalho.setStatusEntregas(StatusEntrega.ATRASADA);
+        } else if (trabalhoInputDTO.entregas().stream().anyMatch(entrega -> entrega.status() == StatusEntrega.EM_REVISAO)) {
+            trabalho.setStatusEntregas(StatusEntrega.EM_REVISAO);
+        } else if (trabalhoInputDTO.entregas().stream().anyMatch(entrega -> entrega.status() == StatusEntrega.EM_ANDAMENTO)) {
+            trabalho.setStatusEntregas(StatusEntrega.EM_ANDAMENTO);
+        } else if (trabalhoInputDTO.entregas().stream().anyMatch(entrega -> entrega.status() == StatusEntrega.NAO_INICIADA)) {
+            trabalho.setStatusEntregas(StatusEntrega.NAO_INICIADA);
+        } else {
+            trabalho.setStatusEntregas(StatusEntrega.CONCLUIDA);
+        }
 
         // Atualiza as entregas
         Map<Long, EntregaAtualizarDTO> entregasAtualizacaoMap = trabalhoInputDTO.entregas().stream()
+                .filter(nullEntrega -> nullEntrega.id() != null)
                 .collect(Collectors.toMap(EntregaAtualizarDTO::id, entrega -> entrega));
 
-        trabalho.getEntregas().forEach(entrega -> {
+        // Atualiza as entregas existentes e remove as que não estão no DTO
+        trabalho.getEntregas().removeIf(entrega -> {
             EntregaAtualizarDTO entregaAtualizarDTO = entregasAtualizacaoMap.get(entrega.getId());
             if (entregaAtualizarDTO != null) {
-                entrega.setNome(entregaAtualizarDTO.nome());
-                entrega.setData(entregaAtualizarDTO.data());
-                entrega.setStatus(entregaAtualizarDTO.status());
+            entrega.setNome(entregaAtualizarDTO.nome());
+            entrega.setData(entregaAtualizarDTO.data());
+            entrega.setStatus(entregaAtualizarDTO.status());
+            return false;
+            } else {
+            return true;
             }
         });
+
+        // Adiciona novas entregas que não possuem ID (novas entregas)
+        trabalhoInputDTO.entregas().stream()
+            .filter(entregaDTO -> entregaDTO.id() == null)
+            .forEach(entregaDTO -> {
+                Entrega novaEntrega = new Entrega();
+                novaEntrega.setTrabalho(trabalho);
+                novaEntrega.setNome(entregaDTO.nome());
+                novaEntrega.setData(entregaDTO.data());
+                novaEntrega.setStatus(entregaDTO.status());
+                trabalho.getEntregas().add(novaEntrega);
+            });
 
         // Atualiza as parcelas
         Map<Long, ParcelaAtualizarDTO> parcelasAtualizacaoMap = trabalhoInputDTO.parcelas().stream()
+                .filter(nullParcela -> nullParcela.id() != null)
                 .collect(Collectors.toMap(ParcelaAtualizarDTO::id, parcela -> parcela));
 
-        trabalho.getParcelas().forEach(parcela -> {
+        // Atualiza as parcelas existentes e remove as que não estão no DTO
+        trabalho.getParcelas().removeIf(parcela -> {
             ParcelaAtualizarDTO parcelaAtualizarDTO = parcelasAtualizacaoMap.get(parcela.getId());
             if (parcelaAtualizarDTO != null) {
-                parcela.setNome(parcelaAtualizarDTO.nome());
-                parcela.setData(parcelaAtualizarDTO.data());
-                parcela.setStatus(parcelaAtualizarDTO.status());
-                parcela.setValor(parcelaAtualizarDTO.valor());
+            parcela.setNome(parcelaAtualizarDTO.nome());
+            parcela.setData(parcelaAtualizarDTO.data());
+            parcela.setStatus(parcelaAtualizarDTO.status());
+            parcela.setValor(parcelaAtualizarDTO.valor());
+            return false;
+            } else {
+            return true;
             }
         });
+
+        // Adiciona novas parcelas que não possuem ID (novas parcelas)
+        trabalhoInputDTO.parcelas().stream()
+            .filter(parcelaDTO -> parcelaDTO.id() == null)
+            .forEach(parcelaDTO -> {
+            Parcela novaParcela = new Parcela();
+            novaParcela.setTrabalho(trabalho);
+            novaParcela.setNome(parcelaDTO.nome());
+            novaParcela.setData(parcelaDTO.data());
+            novaParcela.setStatus(parcelaDTO.status());
+            novaParcela.setValor(parcelaDTO.valor());
+            trabalho.getParcelas().add(novaParcela);
+            });
+
+        // Atualiza o status do trabalho com base na entrega de menor data
+        trabalho.getParcelas().stream()
+        .sorted((e1, e2) -> e1.getData().compareTo(e2.getData()))
+        .filter(parcela -> parcela.getStatus() != StatusParcela.PAGA)
+        .findFirst()
+        .ifPresent(parcela -> trabalho.setStatusParcelas(parcela.getStatus()));
 
         return trabalhoRepository.save(trabalho);
     }
@@ -155,23 +236,49 @@ public class TrabalhoService {
         return trabalho;
     }
 
-    // Listar Todos os trabalhos
+    // // Listar Todos os trabalhos
+    // @Transactional
+    // public List<TrabalhoResumoRetornoDTO> listarTodosTrabalhos() {
+
+    //     return trabalhoRepository.findTrabalhosWithMinEntregaDate();
+    // }
+
+        // Listar Todos os trabalhos
+        @Transactional
+        public List<TrabalhoResumoProxEntregasRetornoDTO> listarTodosTrabalhos() {
+            usuarioService.userIsAuthorized();
+            return trabalhoRepository.findAllTrabalhos();
+        }
+    
+
+    // @Transactional
+    // public List<TrabalhoResumoProxEntregasRetornoDTO> listarTodosTrabalhosEmail(String email) {
+
+    //     return trabalhoRepository.findTrabalhosWithMinEntregaDateByClienteEmail(email);
+    // }
+
+    // @Transactional
+    // public List<TrabalhoResumoParcelasRetornoDTO> listarTodosTrabalhosParcela() {
+    //     usuarioService.userIsAuthorized();
+    //     return trabalhoRepository.findTrabalhosWithMinParcelaDate();
+    // }
+
     @Transactional
-    public List<TrabalhoResumoRetornoDTO> listarTodosTrabalhos() {
-
-        return trabalhoRepository.findTrabalhosWithMinEntregaDate();
-    }
-
-    @Transactional
-    public List<TrabalhoResumoRetornoDTO> listarTodosTrabalhosEmail(String email) {
-
-        return trabalhoRepository.findTrabalhosWithMinEntregaDateByClienteEmail(email);
-    }
-
-    @Transactional
-    public List<TrabalhoResumoParcelasRetornoDTO> listarTodosTrabalhosParcela() {
+    public List<TrabalhoResumoParcelasRetornoDTO> listarTodosTrabalhosProxParcela() {
         usuarioService.userIsAuthorized();
-        return trabalhoRepository.findTrabalhosWithMinParcelaDate();
+        return trabalhoRepository.findTrabalhosProxParcelas();
+    }
+
+    @Transactional
+    public List<TrabalhoResumoProxEntregasRetornoDTO> listarTodosTrabalhosProxEntrega() {
+        usuarioService.userIsAuthorized();
+        return trabalhoRepository.findTrabalhosProxEntregas();
+    }
+
+    @Transactional
+    public List<TrabalhoResumoProxEntregasRetornoDTO> listarMeusTrabalhos() {
+        Usuario usuario = usuarioService.capturaUsuarioToken();
+        return trabalhoRepository.findMeusTrabalhos(usuario.getEmail());
     }
 
 

@@ -5,7 +5,7 @@ import com.rr.gestor_api.dto.cliente.ClienteCriarDTO;
 import com.rr.gestor_api.dto.cliente.ClienteResumoRetornoDTO;
 import com.rr.gestor_api.dto.cliente.ClienteRetornoDTO;
 import com.rr.gestor_api.dto.erro.ErroDTO;
-import com.rr.gestor_api.dto.trabalho.TrabalhoResumoRetornoDTO;
+import com.rr.gestor_api.dto.trabalho.TrabalhoResumoProxEntregasRetornoDTO;
 import com.rr.gestor_api.dto.usuario.LoginResponseDTO;
 import com.rr.gestor_api.repositories.ClienteRepository;
 import com.rr.gestor_api.service.cliente.ClienteService;

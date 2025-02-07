@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Getter
 @Setter
-public class TrabalhoResumoRetornoDTO {
+public class TrabalhoResumoProxEntregasRetornoDTO {
 
     private Long id;
     private String nome;
@@ -24,7 +24,7 @@ public class TrabalhoResumoRetornoDTO {
     private LocalDate proxPrazo;
     private StatusEntrega statusEntrega;
 
-    public TrabalhoResumoRetornoDTO(Long id, String nome, String tema, TipoTrabalho tipoTrabalho, LocalDate proxPrazo, StatusEntrega statusEntrega) {
+    public TrabalhoResumoProxEntregasRetornoDTO(Long id, String nome, String tema, TipoTrabalho tipoTrabalho, LocalDate proxPrazo, StatusEntrega statusEntrega) {
         this.id = id;
         this.nome = nome;
         this.tema = tema;

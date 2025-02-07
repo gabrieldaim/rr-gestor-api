@@ -1,5 +1,6 @@
 package com.rr.gestor_api.dto.trabalho;
 
+import com.rr.gestor_api.domain.trabalho.TipoPagamento;
 import com.rr.gestor_api.domain.trabalho.TipoTrabalho;
 import com.rr.gestor_api.dto.entrega.EntregaAtualizarDTO;
 import com.rr.gestor_api.dto.entrega.EntregaCriarDTO;
@@ -19,6 +20,7 @@ public record TrabalhoAtualizarDTO(Long clienteId,
                                    String caminhoDrive,
                                    String observacao,
                                    BigDecimal valorTotal,
+                                   TipoPagamento tipoPagamento,
                                    List<EntregaAtualizarDTO>entregas,
                                    List<ParcelaAtualizarDTO>parcelas) {
 }

@@ -3,7 +3,7 @@ package com.rr.gestor_api.service.cliente;
 import com.rr.gestor_api.domain.cliente.Cliente;
 import com.rr.gestor_api.dto.cliente.ClienteCriarDTO;
 import com.rr.gestor_api.dto.cliente.ClienteResumoRetornoDTO;
-import com.rr.gestor_api.dto.trabalho.TrabalhoResumoRetornoDTO;
+import com.rr.gestor_api.dto.trabalho.TrabalhoResumoProxEntregasRetornoDTO;
 import com.rr.gestor_api.repositories.ClienteRepository;
 import com.rr.gestor_api.repositories.TrabalhoRepository;
 import com.rr.gestor_api.service.erro.ErroException;

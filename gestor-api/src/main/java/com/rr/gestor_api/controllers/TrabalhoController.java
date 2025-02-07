@@ -42,20 +42,38 @@ public class TrabalhoController {
     }
 
     @GetMapping("/todosResumo")
-    public ResponseEntity<List<TrabalhoResumoRetornoDTO>> buscarTrabalhos() {
-        List<TrabalhoResumoRetornoDTO> trabalhos = service.listarTodosTrabalhos();
+    public ResponseEntity<List<TrabalhoResumoProxEntregasRetornoDTO>> buscarTrabalhos() {
+        List<TrabalhoResumoProxEntregasRetornoDTO> trabalhos = service.listarTodosTrabalhos();
         return ResponseEntity.ok(trabalhos);
     }
 
-    @GetMapping("/todosResumoEmail/{email}")
-    public ResponseEntity<List<TrabalhoResumoRetornoDTO>> buscarTrabalhosEmail(@PathVariable String email) {
-        List<TrabalhoResumoRetornoDTO> trabalhos = service.listarTodosTrabalhosEmail(email);
+    // @GetMapping("/todosResumoEmail/{email}")
+    // public ResponseEntity<List<TrabalhoResumoProxEntregasRetornoDTO>> buscarTrabalhosEmail(@PathVariable String email) {
+    //     List<TrabalhoResumoProxEntregasRetornoDTO> trabalhos = service.listarTodosTrabalhosEmail(email);
+    //     return ResponseEntity.ok(trabalhos);
+    // }
+
+    // @GetMapping("/todosResumoParcelas")
+    // public ResponseEntity<List<TrabalhoResumoParcelasRetornoDTO>> buscarTrabalhoParcela() {
+    //     List<TrabalhoResumoParcelasRetornoDTO> trabalhos = service.listarTodosTrabalhosParcela();
+    //     return ResponseEntity.ok(trabalhos);
+    // }
+
+    @GetMapping("/todosResumoProxParcelas")
+    public ResponseEntity<List<TrabalhoResumoParcelasRetornoDTO>> buscarTrabalhoProxParcela() {
+        List<TrabalhoResumoParcelasRetornoDTO> trabalhos = service.listarTodosTrabalhosProxParcela();
         return ResponseEntity.ok(trabalhos);
     }
 
-    @GetMapping("/todosResumoParcelas")
-    public ResponseEntity<List<TrabalhoResumoParcelasRetornoDTO>> buscarTrabalhoParcela() {
-        List<TrabalhoResumoParcelasRetornoDTO> trabalhos = service.listarTodosTrabalhosParcela();
+    @GetMapping("/todosResumoProxEntregas")
+    public ResponseEntity<List<TrabalhoResumoProxEntregasRetornoDTO>> buscarTrabalhoProxEntrega() {
+        List<TrabalhoResumoProxEntregasRetornoDTO> trabalhos = service.listarTodosTrabalhosProxEntrega();
+        return ResponseEntity.ok(trabalhos);
+    }
+
+    @GetMapping("/todosResumoMeusTrabalhos")
+    public ResponseEntity<List<TrabalhoResumoProxEntregasRetornoDTO>> buscarMeusTrabalho() {
+        List<TrabalhoResumoProxEntregasRetornoDTO> trabalhos = service.listarMeusTrabalhos();
         return ResponseEntity.ok(trabalhos);
     }
 

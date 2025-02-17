@@ -27,7 +27,7 @@ public class Cliente {
 
     private String telefone;
 
-    private String tipoCliente;
+    private TipoCliente tipoCliente;
 
     private String observacao;
 

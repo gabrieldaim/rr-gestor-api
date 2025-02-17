@@ -47,11 +47,11 @@ public class TrabalhoController {
         return ResponseEntity.ok(trabalhos);
     }
 
-    // @GetMapping("/todosResumoEmail/{email}")
-    // public ResponseEntity<List<TrabalhoResumoProxEntregasRetornoDTO>> buscarTrabalhosEmail(@PathVariable String email) {
-    //     List<TrabalhoResumoProxEntregasRetornoDTO> trabalhos = service.listarTodosTrabalhosEmail(email);
-    //     return ResponseEntity.ok(trabalhos);
-    // }
+    @GetMapping("/todosResumoEmail/{email}")
+    public ResponseEntity<List<TrabalhoResumoProxEntregasRetornoDTO>> buscarTrabalhosEmail(@PathVariable String email) {
+        List<TrabalhoResumoProxEntregasRetornoDTO> trabalhos = service.listarTodosTrabalhosEmail(email);
+        return ResponseEntity.ok(trabalhos);
+    }
 
     // @GetMapping("/todosResumoParcelas")
     // public ResponseEntity<List<TrabalhoResumoParcelasRetornoDTO>> buscarTrabalhoParcela() {

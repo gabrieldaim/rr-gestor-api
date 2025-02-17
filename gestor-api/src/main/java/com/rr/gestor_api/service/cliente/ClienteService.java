@@ -88,6 +88,13 @@ public class ClienteService {
         return clienteRepository.findClientesComUltimoTrabalho();
     }
 
+    // Listar Todos os Clientes
+    @Transactional
+    public List<ClienteResumoRetornoDTO> listarTodosClientesTable() {
+        usuarioService.userIsAuthorized();
+        return clienteRepository.findClientesComUltimoTrabalho();
+    }
+
     // Deletar Cliente
     @Transactional
     public void deletarCliente(Long id) {

@@ -45,10 +45,10 @@ public class TrabalhoService {
     public Trabalho criarTrabalho(TrabalhoCriarDTO trabalhoInputDTO) {
         // Busca o cliente pelo ID
         Cliente cliente = clienteRepository.findById(trabalhoInputDTO.clienteId())
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado com o ID: " + trabalhoInputDTO.clienteId()));
+                .orElseThrow(() -> new ErroException("clienteId", "Cliente não encontrado com o ID: " + trabalhoInputDTO.clienteId()));
 
         Usuario usuario = usuarioRepository.findByEmail(trabalhoInputDTO.responsavelEmail())
-                .orElseThrow(() -> new RuntimeException("Usuario não encontrado com o email: " + trabalhoInputDTO.responsavelEmail()));
+                .orElseThrow(() -> new ErroException("responsavelEmail", "Usuario não encontrado com o email: " + trabalhoInputDTO.responsavelEmail()));
 
         // Cria o trabalho associado ao cliente
         Trabalho trabalho = new Trabalho();
@@ -121,7 +121,7 @@ public class TrabalhoService {
                 .orElseThrow(() -> new ErroException("clienteId","Cliente não encontrado com o ID: " + trabalhoInputDTO.clienteId()));
 
         Usuario responsavel = usuarioRepository.findByEmail(trabalhoInputDTO.responsavelEmail())
-                .orElseThrow(() -> new ErroException("responsavelId","Responsavel não encontrado com o Email: " + trabalhoInputDTO.responsavelEmail()));
+                .orElseThrow(() -> new ErroException("responsavelEmail","Responsavel não encontrado com o Email: " + trabalhoInputDTO.responsavelEmail()));
 
         usuarioService.usuarioIsResponsavel(trabalho.getResponsavel().getId());
 
@@ -251,11 +251,11 @@ public class TrabalhoService {
         }
     
 
-    // @Transactional
-    // public List<TrabalhoResumoProxEntregasRetornoDTO> listarTodosTrabalhosEmail(String email) {
+    @Transactional
+    public List<TrabalhoResumoProxEntregasRetornoDTO> listarTodosTrabalhosEmail(String email) {
 
-    //     return trabalhoRepository.findTrabalhosWithMinEntregaDateByClienteEmail(email);
-    // }
+        return trabalhoRepository.findTrabalhosWithMinEntregaDateByClienteEmail(email);
+    }
 
     // @Transactional
     // public List<TrabalhoResumoParcelasRetornoDTO> listarTodosTrabalhosParcela() {

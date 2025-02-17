@@ -42,8 +42,14 @@ public class ClienteController {
     }
 
     @GetMapping("/todosResumo")
-    public ResponseEntity<List<ClienteResumoRetornoDTO>> buscarTrabalhoPorId() {
+    public ResponseEntity<List<ClienteResumoRetornoDTO>> buscarTodosClientes() {
         List<ClienteResumoRetornoDTO> clientes = service.listarTodosClientes();
+        return ResponseEntity.ok(clientes);
+    }
+    
+    @GetMapping("/todosResumoTable")
+    public ResponseEntity<List<ClienteResumoRetornoDTO>> buscarTodosClientesTable() {
+        List<ClienteResumoRetornoDTO> clientes = service.listarTodosClientesTable();
         return ResponseEntity.ok(clientes);
     }
 

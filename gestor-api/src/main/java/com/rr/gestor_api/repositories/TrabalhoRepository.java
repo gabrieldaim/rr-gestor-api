@@ -75,20 +75,20 @@ List<TrabalhoResumoProxEntregasRetornoDTO> findMeusTrabalhos(@Param("responsavel
         "ORDER BY e.data DESC") // Ordenando pela data mais recente
 List<TrabalhoResumoProxEntregasRetornoDTO> findAllTrabalhos();
 
-    // @Query("SELECT new com.rr.gestor_api.dto.trabalho.TrabalhoResumoRetornoDTO(" +
-    //         "t.id, " +
-    //         "t.cliente.nome, " +
-    //         "t.tema, " +
-    //         "t.tipoTrabalho, " +
-    //         "MIN(e.data), " +
-    //         "e.status) " +
-    //         "FROM Trabalho t " +
-    //         "LEFT JOIN t.entregas e " +
-    //         "WHERE (e.data = (SELECT MIN(e2.data) FROM t.entregas e2 WHERE e2.trabalho = t) OR e.data IS NULL) " +
-    //         "AND t.cliente.email = :email " +
-    //         "GROUP BY t.id, t.cliente.nome, t.tema, t.tipoTrabalho, e.status " +
-    //         "ORDER BY MIN(e.data) ASC")
-    // List<TrabalhoResumoProxEntregasRetornoDTO> findTrabalhosWithMinEntregaDateByClienteEmail(@Param("email") String email);
+    @Query("SELECT new com.rr.gestor_api.dto.trabalho.TrabalhoResumoProxEntregasRetornoDTO(" +
+            "t.id, " +
+            "t.cliente.nome, " +
+            "t.tema, " +
+            "t.tipoTrabalho, " +
+            "MIN(e.data), " +
+            "e.status) " +
+            "FROM Trabalho t " +
+            "LEFT JOIN t.entregas e " +
+            "WHERE (e.data = (SELECT MIN(e2.data) FROM t.entregas e2 WHERE e2.trabalho = t) OR e.data IS NULL) " +
+            "AND t.cliente.email = :email " +
+            "GROUP BY t.id, t.cliente.nome, t.tema, t.tipoTrabalho, e.status " +
+            "ORDER BY MIN(e.data) ASC")
+    List<TrabalhoResumoProxEntregasRetornoDTO> findTrabalhosWithMinEntregaDateByClienteEmail(@Param("email") String email);
 
 //     @Query("SELECT new com.rr.gestor_api.dto.trabalho.TrabalhoResumoProxEntregasRetornoDTO(" +
 //        "t.id, " +

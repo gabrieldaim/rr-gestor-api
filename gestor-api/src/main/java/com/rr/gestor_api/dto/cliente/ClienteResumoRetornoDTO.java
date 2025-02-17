@@ -1,5 +1,7 @@
 package com.rr.gestor_api.dto.cliente;
 
+import com.rr.gestor_api.domain.cliente.TipoCliente;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,5 +14,5 @@ public class ClienteResumoRetornoDTO {
     private String email;
     private String telefone;
     private String ultimoTrabalho;
-    private String tipoCliente;
+    private TipoCliente tipoCliente;
 }

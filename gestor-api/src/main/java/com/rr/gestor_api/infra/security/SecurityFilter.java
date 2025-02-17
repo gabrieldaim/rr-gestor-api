@@ -25,6 +25,12 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+            // Ignora a validação de token em rotas de login e registro
+    if (request.getRequestURI().equals("/auth/register") || request.getRequestURI().equals("/auth/login")) {
+        filterChain.doFilter(request, response);
+        return;
+    }
+        
         var token = this.recoverToken(request);
         var login = tokenService.validateToken(token);
 

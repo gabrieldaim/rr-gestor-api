@@ -19,6 +19,9 @@ import com.rr.gestor_api.repositories.UsuarioRepository;
 import com.rr.gestor_api.service.erro.ErroException;
 import com.rr.gestor_api.service.usuario.UsuarioService;
 import jakarta.transaction.Transactional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -29,6 +32,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class TrabalhoService {
+
+    private static final Logger logger = LoggerFactory.getLogger(TrabalhoService.class);
+
 
     private final TrabalhoRepository trabalhoRepository;
     private final ClienteRepository clienteRepository;
@@ -309,7 +315,7 @@ public class TrabalhoService {
             for (Parcela parcela : trabalho.getParcelas()) {
                 if (parcela.getStatus() == StatusParcela.AGUARDANDO_DATA && parcela.getData().isBefore(dataAtual)) {
                     parcela.setStatus(StatusParcela.ATRASADA);
-                    System.out.println("Trabalho:" + parcela.getTrabalho().getId() + "atualizado com sucesso!");
+                    logger.info("Trabalho: " + parcela.getTrabalho().getTema() + " atualizado com sucesso!");
                     possuiParcelaAtrasada = true; // Marca que o trabalho tem ao menos uma parcela atrasada
                 }
             }
@@ -336,7 +342,7 @@ public class TrabalhoService {
             for (Entrega entrega : trabalho.getEntregas()) {
                 if ((entrega.getStatus() == StatusEntrega.EM_REVISAO || entrega.getStatus() == StatusEntrega.EM_ANDAMENTO || entrega.getStatus() == StatusEntrega.NAO_INICIADA) && entrega.getData().isBefore(dataAtual)) {
                     entrega.setStatus(StatusEntrega.ATRASADA);
-                    System.out.println("Trabalho:" + entrega.getTrabalho().getId() + "atualizado com sucesso!");
+                    logger.info("Trabalho:" + entrega.getTrabalho().getId() + "atualizado com sucesso!");
                     possuiEntregaAtrasada = true; // Marca que o trabalho tem ao menos uma entrega atrasada
                 }
             }
@@ -346,7 +352,7 @@ public class TrabalhoService {
                 trabalho.setStatusEntregas(StatusEntrega.ATRASADA);
             }
         }
-        System.out.println("####################trabalhos atualizados####################");
+        logger.info("####################trabalhos atualizados####################");
     }
 
 }

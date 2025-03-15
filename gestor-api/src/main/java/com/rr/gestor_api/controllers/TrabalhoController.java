@@ -16,14 +16,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 @RestController
 @RequestMapping("/trabalho")
 @RequiredArgsConstructor
 public class TrabalhoController {
+    private static final AtomicReference<LocalDate> ultimaExecucao = new AtomicReference<>(LocalDate.MIN);
     private final TrabalhoRepository repository;
     private final TrabalhoService service;
 
@@ -73,6 +76,13 @@ public class TrabalhoController {
 
     @GetMapping("/todosResumoMeusTrabalhos")
     public ResponseEntity<List<TrabalhoResumoProxEntregasRetornoDTO>> buscarMeusTrabalho() {
+        LocalDate hoje = LocalDate.now();
+        
+        // Se for a primeira execução do dia
+        if (!hoje.equals(ultimaExecucao.get())) {
+            ultimaExecucao.set(hoje); // Atualiza a última data
+            service.atualizarStatusTrabalhos(); // Executa a função adicional
+        }
         List<TrabalhoResumoProxEntregasRetornoDTO> trabalhos = service.listarMeusTrabalhos();
         return ResponseEntity.ok(trabalhos);
     }

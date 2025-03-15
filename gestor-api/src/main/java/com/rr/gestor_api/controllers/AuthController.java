@@ -6,6 +6,7 @@ import com.rr.gestor_api.dto.usuario.*;
 import com.rr.gestor_api.infra.security.TokenService;
 import com.rr.gestor_api.repositories.UsuarioRepository;
 import com.rr.gestor_api.service.erro.ErroException;
+import com.rr.gestor_api.service.trabalho.TrabalhoService;
 import com.rr.gestor_api.service.usuario.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ public class AuthController {
     private final UsuarioRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
+    private final TrabalhoService trabalhoService;
     private final UsuarioService usuarioService;
 
     @PostMapping("/login")
@@ -32,6 +34,7 @@ public class AuthController {
                     .orElseThrow(() -> new RuntimeException("Usuario não encontrado"));
             if (passwordEncoder.matches(body.senha(), user.getSenha())) {
                 String token = this.tokenService.generateToken(user);
+                trabalhoService.atualizarStatusTrabalhos();
                 return ResponseEntity.ok(new LoginResponseDTO(user.getId(),user.getNome(), token,user.getTipo()));
             }
             return ResponseEntity.badRequest().body("Usuário ou senha incorreto");

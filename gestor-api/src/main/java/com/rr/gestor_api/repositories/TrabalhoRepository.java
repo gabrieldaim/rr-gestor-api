@@ -6,9 +6,11 @@ import com.rr.gestor_api.domain.trabalho.Trabalho;
 import com.rr.gestor_api.dto.trabalho.TrabalhoResumoParcelasRetornoDTO;
 import com.rr.gestor_api.dto.trabalho.TrabalhoResumoProxEntregasRetornoDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface TrabalhoRepository extends JpaRepository<Trabalho, Long> {
@@ -110,6 +112,27 @@ List<TrabalhoResumoProxEntregasRetornoDTO> findAllTrabalhos();
     @Query("SELECT t FROM Trabalho t JOIN t.entregas e WHERE e.status IN :statuses")
     List<Trabalho> findTrabalhosWithEntregasStatus(@Param("statuses") List<StatusEntrega> statuses);
 
+    @Modifying
+    @Query("UPDATE Parcela p SET p.status = :novoStatus WHERE p.status = :statusAtual AND p.data < :dataAtual")
+    int atualizarParcelasAtrasadas(@Param("statusAtual") StatusParcela statusAtual,
+                                   @Param("novoStatus") StatusParcela novoStatus,
+                                   @Param("dataAtual") LocalDate dataAtual);
+
+    @Modifying
+    @Query("UPDATE Trabalho t SET t.statusParcelas = :novoStatus WHERE EXISTS (" +
+           "SELECT 1 FROM Parcela p WHERE p.trabalho = t AND p.status = :novoStatus)")
+    int atualizarTrabalhosParcelasAtrasadas(@Param("novoStatus") StatusParcela novoStatus);
+
+    @Modifying
+    @Query("UPDATE Entrega e SET e.status = :novoStatus WHERE e.status IN :statuses AND e.data < :dataAtual")
+    int atualizarEntregasAtrasadas(@Param("statuses") List<StatusEntrega> statuses,
+                                   @Param("novoStatus") StatusEntrega novoStatus,
+                                   @Param("dataAtual") LocalDate dataAtual);
+
+    @Modifying
+    @Query("UPDATE Trabalho t SET t.statusEntregas = :novoStatus WHERE EXISTS (" +
+           "SELECT 1 FROM Entrega e WHERE e.trabalho = t AND e.status = :novoStatus)")
+    int atualizarTrabalhosEntregasAtrasadas(@Param("novoStatus") StatusEntrega novoStatus);
 
 
 

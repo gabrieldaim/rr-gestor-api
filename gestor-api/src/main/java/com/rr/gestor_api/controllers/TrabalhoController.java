@@ -77,12 +77,12 @@ public class TrabalhoController {
     @GetMapping("/todosResumoMeusTrabalhos")
     public ResponseEntity<List<TrabalhoResumoProxEntregasRetornoDTO>> buscarMeusTrabalho() {
         LocalDate hoje = LocalDate.now();
-        
-        // Se for a primeira execução do dia
-        if (!hoje.equals(ultimaExecucao.get())) {
-            ultimaExecucao.set(hoje); // Atualiza a última data
-            service.atualizarStatusTrabalhos(); // Executa a função adicional
+
+        // Atualiza a variável apenas se for um novo dia e se ninguém já tiver atualizado
+        if (ultimaExecucao.compareAndSet(ultimaExecucao.get(), hoje)) {
+            service.atualizarStatusTrabalhos();
         }
+    
         List<TrabalhoResumoProxEntregasRetornoDTO> trabalhos = service.listarMeusTrabalhos();
         return ResponseEntity.ok(trabalhos);
     }

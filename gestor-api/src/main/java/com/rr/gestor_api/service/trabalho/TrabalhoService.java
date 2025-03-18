@@ -300,59 +300,23 @@ public class TrabalhoService {
 
     @Transactional
     public void atualizarStatusTrabalhos() {
-        // Busca todos os trabalhos com parcelas aguardando data
-        List<Trabalho> trabalhosParcelas = trabalhoRepository.findTrabalhosWithParcelasStatus(StatusParcela.AGUARDANDO_DATA);
-
-        // Data atual
         LocalDate dataAtual = LocalDate.now();
 
-        // Varre os trabalhos
-        for (Trabalho trabalho : trabalhosParcelas) {
-            boolean possuiParcelaAtrasada = false;
-
-
-            // Atualiza o status das parcelas
-            for (Parcela parcela : trabalho.getParcelas()) {
-                if (parcela.getStatus() == StatusParcela.AGUARDANDO_DATA && parcela.getData().isBefore(dataAtual)) {
-                    parcela.setStatus(StatusParcela.ATRASADA);
-                    logger.info("Trabalho: " + parcela.getTrabalho().getTema() + " atualizado com sucesso!");
-                    possuiParcelaAtrasada = true; // Marca que o trabalho tem ao menos uma parcela atrasada
-                }
-            }
-
-            // Atualiza o status do trabalho, se necessário
-            if (possuiParcelaAtrasada) {
-                trabalho.setStatusParcelas(StatusParcela.ATRASADA);
-            }
-        }
-
-        List<StatusEntrega> statuses = Arrays.asList(
-                StatusEntrega.NAO_INICIADA,
-                StatusEntrega.EM_ANDAMENTO,
-                StatusEntrega.EM_REVISAO
-        );
-
-        List<Trabalho> trabalhosEntrega = trabalhoRepository.findTrabalhosWithEntregasStatus(statuses);
-
-        for (Trabalho trabalho : trabalhosEntrega) {
-            boolean possuiEntregaAtrasada = false;
-
-
-            // Atualiza o status das Entregas
-            for (Entrega entrega : trabalho.getEntregas()) {
-                if ((entrega.getStatus() == StatusEntrega.EM_REVISAO || entrega.getStatus() == StatusEntrega.EM_ANDAMENTO || entrega.getStatus() == StatusEntrega.NAO_INICIADA) && entrega.getData().isBefore(dataAtual)) {
-                    entrega.setStatus(StatusEntrega.ATRASADA);
-                    logger.info("Trabalho:" + entrega.getTrabalho().getId() + "atualizado com sucesso!");
-                    possuiEntregaAtrasada = true; // Marca que o trabalho tem ao menos uma entrega atrasada
-                }
-            }
-
-            // Atualiza o status do trabalho, se necessário
-            if (possuiEntregaAtrasada) {
-                trabalho.setStatusEntregas(StatusEntrega.ATRASADA);
-            }
-        }
-        logger.info("####################trabalhos atualizados####################");
+        // Atualiza status das parcelas diretamente no banco
+        int parcelasAtualizadas = trabalhoRepository.atualizarParcelasAtrasadas(StatusParcela.AGUARDANDO_DATA, StatusParcela.ATRASADA, dataAtual);
+        logger.info(parcelasAtualizadas + " parcelas atualizadas para ATRASADA.");
+    
+        // Atualiza status dos trabalhos cujas parcelas ficaram atrasadas
+        int trabalhosParcelasAtualizados = trabalhoRepository.atualizarTrabalhosParcelasAtrasadas(StatusParcela.ATRASADA);
+        logger.info(trabalhosParcelasAtualizados + " trabalhos atualizados para status de parcelas ATRASADA.");
+    
+        // Atualiza status das entregas diretamente no banco
+        List<StatusEntrega> statuses = Arrays.asList(StatusEntrega.NAO_INICIADA, StatusEntrega.EM_ANDAMENTO, StatusEntrega.EM_REVISAO);
+        int entregasAtualizadas = trabalhoRepository.atualizarEntregasAtrasadas(statuses, StatusEntrega.ATRASADA, dataAtual);
+        logger.info(entregasAtualizadas + " entregas atualizadas para ATRASADA.");
+    
+        // Atualiza status dos trabalhos cujas entregas ficaram atrasadas
+        int trabalhosEntregasAtualizados = trabalhoRepository.atualizarTrabalhosEntregasAtrasadas(StatusEntrega.ATRASADA);
+        logger.info(trabalhosEntregasAtualizados + " trabalhos atualizados para status de entregas ATRASADA.");
     }
-
 }

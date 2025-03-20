@@ -6,6 +6,7 @@ import com.rr.gestor_api.domain.entrega.StatusEntrega;
 import com.rr.gestor_api.domain.parcela.Parcela;
 import com.rr.gestor_api.domain.parcela.StatusParcela;
 import com.rr.gestor_api.domain.trabalho.Trabalho;
+import com.rr.gestor_api.domain.usuario.TiposUsuarios;
 import com.rr.gestor_api.domain.usuario.Usuario;
 import com.rr.gestor_api.dto.entrega.EntregaAtualizarDTO;
 import com.rr.gestor_api.dto.parcela.ParcelaAtualizarDTO;
@@ -252,8 +253,12 @@ public class TrabalhoService {
         // Listar Todos os trabalhos
         @Transactional
         public List<TrabalhoResumoProxEntregasRetornoDTO> listarTodosTrabalhos() {
-            usuarioService.userIsAuthorized();
-            return trabalhoRepository.findAllTrabalhos();
+            Usuario usuario = usuarioService.capturaUsuarioToken();
+            if(TiposUsuarios.ADMIN.equals(usuario.getTipo())){
+                return trabalhoRepository.findAllTrabalhos();
+            }else{
+                return trabalhoRepository.findAllTrabalhosAux(usuario.getEmail());
+            }
         }
     
 

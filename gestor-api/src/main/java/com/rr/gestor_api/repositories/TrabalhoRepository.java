@@ -81,6 +81,22 @@ List<TrabalhoResumoProxEntregasRetornoDTO> findMeusTrabalhos(@Param("responsavel
         "ORDER BY e.data DESC") // Ordenando pela data mais recente
 List<TrabalhoResumoProxEntregasRetornoDTO> findAllTrabalhos();
 
+        @Query("SELECT new com.rr.gestor_api.dto.trabalho.TrabalhoResumoProxEntregasRetornoDTO(" +
+        "t.id, " +
+        "t.cliente.nome, " +
+        "t.responsavel.nome, " +
+        "t.tema, " +
+        "t.tipoTrabalho, " +
+        "e.data, " +
+        "e.status) " +
+        "FROM Trabalho t " +
+        "JOIN t.entregas e " +
+        "JOIN t.responsavel r " + // Adicionando o JOIN para a entidade Usuario
+        "WHERE e.data = (SELECT MAX(e2.data) FROM t.entregas e2) " + // Subconsulta para obter a data mais recente
+        "AND r.email = :responsavelEmail " + // Adicionando a condição para o email do responsável
+        "ORDER BY e.data ASC")
+List<TrabalhoResumoProxEntregasRetornoDTO> findAllTrabalhosAux(@Param("responsavelEmail") String responsavelEmail);
+
     @Query("SELECT new com.rr.gestor_api.dto.trabalho.TrabalhoResumoProxEntregasRetornoDTO(" +
             "t.id, " +
             "t.cliente.nome, " +

@@ -18,14 +18,16 @@ public class TrabalhoResumoParcelasRetornoDTO {
 
     private Long id;
     private String nome;
+    private String responsavel;
     private String tema;
     private TipoTrabalho tipoTrabalho;
     private LocalDate proxPrazo;
     private StatusParcela statusParcela;
 
-    public TrabalhoResumoParcelasRetornoDTO(Long id, String nome, String tema, TipoTrabalho tipoTrabalho, LocalDate proxPrazo, StatusParcela statusParcela) {
+    public TrabalhoResumoParcelasRetornoDTO(Long id, String nome, String responsavel, String tema, TipoTrabalho tipoTrabalho, LocalDate proxPrazo, StatusParcela statusParcela) {
         this.id = id;
         this.nome = nome;
+        this.responsavel = responsavel;
         this.tema = tema;
         this.tipoTrabalho = tipoTrabalho;
         this.proxPrazo = proxPrazo;

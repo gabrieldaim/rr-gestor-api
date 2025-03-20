@@ -19,6 +19,7 @@ public interface TrabalhoRepository extends JpaRepository<Trabalho, Long> {
     @Query("SELECT new com.rr.gestor_api.dto.trabalho.TrabalhoResumoProxEntregasRetornoDTO(" +
             "t.id, " +
             "t.cliente.nome, " +
+            "t.responsavel.nome, " +
             "t.tema, " +
             "t.tipoTrabalho, " +
             "e.data, " +
@@ -35,6 +36,7 @@ List<TrabalhoResumoProxEntregasRetornoDTO> findTrabalhosProxEntregas();
 @Query("SELECT new com.rr.gestor_api.dto.trabalho.TrabalhoResumoParcelasRetornoDTO(" +
 "t.id, " +
 "t.cliente.nome, " +
+"t.responsavel.nome, " +
 "t.tema, " +
 "t.tipoTrabalho, " +
 "p.data, " +
@@ -50,6 +52,7 @@ List<TrabalhoResumoProxEntregasRetornoDTO> findTrabalhosProxEntregas();
     @Query("SELECT new com.rr.gestor_api.dto.trabalho.TrabalhoResumoProxEntregasRetornoDTO(" +
     "t.id, " +
     "t.cliente.nome, " +
+    "t.responsavel.nome, " +
     "t.tema, " +
     "t.tipoTrabalho, " +
     "e.data, " +
@@ -67,6 +70,7 @@ List<TrabalhoResumoProxEntregasRetornoDTO> findMeusTrabalhos(@Param("responsavel
 @Query("SELECT new com.rr.gestor_api.dto.trabalho.TrabalhoResumoProxEntregasRetornoDTO(" +
         "t.id, " +
         "t.cliente.nome, " +
+        "t.responsavel.nome, " +
         "t.tema, " +
         "t.tipoTrabalho, " +
         "e.data, " +
@@ -80,6 +84,7 @@ List<TrabalhoResumoProxEntregasRetornoDTO> findAllTrabalhos();
     @Query("SELECT new com.rr.gestor_api.dto.trabalho.TrabalhoResumoProxEntregasRetornoDTO(" +
             "t.id, " +
             "t.cliente.nome, " +
+            "t.responsavel.nome, " +
             "t.tema, " +
             "t.tipoTrabalho, " +
             "MIN(e.data), " +
@@ -88,7 +93,7 @@ List<TrabalhoResumoProxEntregasRetornoDTO> findAllTrabalhos();
             "LEFT JOIN t.entregas e " +
             "WHERE (e.data = (SELECT MIN(e2.data) FROM t.entregas e2 WHERE e2.trabalho = t) OR e.data IS NULL) " +
             "AND t.cliente.email = :email " +
-            "GROUP BY t.id, t.cliente.nome, t.tema, t.tipoTrabalho, e.status " +
+            "GROUP BY t.id, t.cliente.nome, t.responsavel.nome, t.tema, t.tipoTrabalho, e.status " +
             "ORDER BY MIN(e.data) ASC")
     List<TrabalhoResumoProxEntregasRetornoDTO> findTrabalhosWithMinEntregaDateByClienteEmail(@Param("email") String email);
 
